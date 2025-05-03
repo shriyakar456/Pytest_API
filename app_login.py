@@ -14,6 +14,13 @@ def init_db():
     cursor.execute("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT)")
     conn.commit()
     conn.close()
+    
+def reset_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users")
+    conn.commit()
+    conn.close()
 
 @app.route("/add_user", methods=["POST"])
 def add_user():

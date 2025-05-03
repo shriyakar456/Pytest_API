@@ -2,6 +2,11 @@ import pytest
 import requests
 import json
 import time
+from app_login import reset_db
+
+@pytest.fixture(autouse=True)
+def clean_state():
+    reset_db()
 
 BASE_URL = "http://127.0.0.1:5000"
 

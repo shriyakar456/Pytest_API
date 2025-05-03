@@ -5,8 +5,16 @@ def pytest_runtest_logreport(report):
     if report.when == 'call':
         conn = sqlite3.connect("test_reports.db",check_same_thread=False)
         cursor = conn.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS test_results (id INTEGER PRIMARY KEY AUTOINCREMENT,test_name TEXT,status TEXT,timestamp TEXT)")
         status = "PASS" if report.passed else "FAIL"
         cursor.execute("INSERT INTO test_results (test_name, status, timestamp) VALUES (?, ?, ?)",
                        (report.nodeid, status, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
         conn.commit()
         conn.close()
+        
+def pytest_sessionstart(session):
+    conn = sqlite3.connect("test_reports.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM test_results")
+    conn.commit()
+    conn.close()
