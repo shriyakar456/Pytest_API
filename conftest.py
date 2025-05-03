@@ -15,6 +15,7 @@ def pytest_runtest_logreport(report):
 def pytest_sessionstart(session):
     conn = sqlite3.connect("test_reports.db")
     cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS test_results (id INTEGER PRIMARY KEY AUTOINCREMENT,test_name TEXT,status TEXT,timestamp TEXT)")
     cursor.execute("DELETE FROM test_results")
     conn.commit()
     conn.close()
