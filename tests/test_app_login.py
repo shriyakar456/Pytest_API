@@ -27,7 +27,7 @@ def test_login_negative(user):
     assert response.status_code == user["expected"], f"{user['username']} unexpectedly passed"
 
 # ✅ Positive get_user test
-'''@pytest.mark.parametrize("user", load_users("users.json"))
+@pytest.mark.parametrize("user", load_users("users.json"))
 def test_get_user_positive(user):
     requests.post(f"{BASE_URL}/add_user", json=user)
     time.sleep(0.05)
@@ -69,4 +69,4 @@ def test_delete_user_positive(user):
 def test_delete_user_negative(user):
     response = requests.delete(f"{BASE_URL}/delete_user", json={"username": user["username"]})
     time.sleep(0.05)
-    assert response.status_code == 404, f"{user['username']} should not be deletable"'''
+    assert response.status_code == 404, f"{user['username']} should not be deletable"
