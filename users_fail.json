@@ -1,0 +1,14 @@
+[
+  {
+    "username": "user1",
+    "password": "wrongpass",
+    "expected": 401,
+    "role": "user"
+  },
+  {
+    "username": "ghost",
+    "password": "ghostpass",
+    "expected": 404,
+    "role": "unknown"
+  }
+]
