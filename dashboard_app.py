@@ -38,33 +38,33 @@ def dashboard():
 
         # ✅ Get latest test summary
         cursor.execute("SELECT timestamp FROM test_results ORDER BY timestamp DESC LIMIT 1")
-    latest_time_row = cursor.fetchone()
-    
-    summary = {"timestamp": "N/A", "PASS": 0, "FAIL": 0}
-    
-    if latest_time_row:
-        latest_time = latest_time_row[0]
-        summary["timestamp"] = latest_time
-    
-        # Fetch pass/fail counts for this timestamp
-        cursor.execute("""
-            SELECT status, COUNT(*) 
-            FROM test_results 
-            WHERE timestamp=? 
-            GROUP BY status
-        """, (latest_time,))
+        latest_time_row = cursor.fetchone()
         
-        results = cursor.fetchall()
-        for status, count in results:
-            summary[status] = count
-    
-        # Ensure both keys exist
-        summary["PASS"] = summary.get("PASS", 0)
-        summary["FAIL"] = summary.get("FAIL", 0)
+        summary = {"timestamp": "N/A", "PASS": 0, "FAIL": 0}
+        
+        if latest_time_row:
+            latest_time = latest_time_row[0]
+            summary["timestamp"] = latest_time
+        
+            # Fetch pass/fail counts for this timestamp
+            cursor.execute("""
+                SELECT status, COUNT(*) 
+                FROM test_results 
+                WHERE timestamp=? 
+                GROUP BY status
+            """, (latest_time,))
+            
+            results = cursor.fetchall()
+            for status, count in results:
+                summary[status] = count
+        
+            # Ensure both keys exist
+            summary["PASS"] = summary.get("PASS", 0)
+            summary["FAIL"] = summary.get("FAIL", 0)
 
-        conn.close()
-        print(f"📊 {len(results)} results loaded from DB")
-        return render_template("dashboard.html", results=results, summary=summary)
+            conn.close()
+            print(f"📊 {len(results)} results loaded from DB")
+            return render_template("dashboard.html", results=results, summary=summary)
 
     except Exception as e:
         print("❌ Error while loading dashboard:", e)
