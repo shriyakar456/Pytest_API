@@ -37,7 +37,7 @@ def dashboard():
         results = cursor.fetchall()
 
         # ✅ Get latest test summary
-       cursor.execute("SELECT timestamp FROM test_results ORDER BY timestamp DESC LIMIT 1")
+        cursor.execute("SELECT timestamp FROM test_results ORDER BY timestamp DESC LIMIT 1")
     latest_time_row = cursor.fetchone()
     
     summary = {"timestamp": "N/A", "PASS": 0, "FAIL": 0}
