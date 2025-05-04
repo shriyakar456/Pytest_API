@@ -63,7 +63,7 @@ jobs:
       - name: Commit test_reports.db to repo
         if: github.ref == 'refs/heads/main'
         run: |
-          git config user.name "shriyakar456"
+          git config user.name "Shriya Kar"
           git config user.email "shriyakar456@gmail.com"
           git add test_reports.db
           git commit -m "🔄 Update test_reports.db after CI run" || echo "No changes to commit"
