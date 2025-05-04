@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request
 import sqlite3
 import os
-from logger import setup_logger
 
 app = Flask(__name__)
-logger = setup_logger("Dashboard")
 
 def init_report_db():
     if not os.path.exists("test_reports.db"):
@@ -20,51 +18,40 @@ def init_report_db():
         """)
         conn.commit()
         conn.close()
-        logger.info("Initialized test_reports.db")
 
 @app.route("/")
 def dashboard():
-    logger.info("Dashboard route hit")
+    print("🟢 / route hit")
     try:
         conn = sqlite3.connect("test_reports.db", check_same_thread=False)
         cursor = conn.cursor()
 
+        # Optional filter by status (pass/fail)
         status_filter = request.args.get("status")
         if status_filter:
-            logger.info(f"Filtering by status: {status_filter}")
+            print(f"🔍 Filtering by status: {status_filter}")
             cursor.execute("SELECT * FROM test_results WHERE status=? ORDER BY timestamp DESC", (status_filter,))
         else:
             cursor.execute("SELECT * FROM test_results ORDER BY timestamp DESC")
         results = cursor.fetchall()
 
-        cursor.execute("SELECT timestamp FROM test_results ORDER BY timestamp DESC LIMIT 1")
-        latest_time_row = cursor.fetchone()
-
-        summary = {"timestamp": "N/A", "PASS": 0, "FAIL": 0}
-        if latest_time_row:
-            latest_time = latest_time_row[0]
-            summary["timestamp"] = latest_time
-
-            cursor.execute("""
-                SELECT status, COUNT(*)
-                FROM test_results
-                WHERE timestamp=?
-                GROUP BY status
-            """, (latest_time,))
-            result_counts = cursor.fetchall()
-            for status, count in result_counts:
-                summary[status] = count
+        # Updated summary for ALL tests (not just latest run)
+        summary = {"PASS": 0, "FAIL": 0, "timestamp": "ALL"}
+        cursor.execute("SELECT status, COUNT(*) FROM test_results GROUP BY status")
+        counts = cursor.fetchall()
+        for status, count in counts:
+            summary[status] = count
 
         summary["PASS"] = summary.get("PASS", 0)
         summary["FAIL"] = summary.get("FAIL", 0)
-        conn.close()
 
-        logger.info(f"Loaded {len(results)} test results from DB")
+        conn.close()
+        print(f"📊 {len(results)} results loaded from DB")
         return render_template("dashboard.html", results=results, summary=summary)
 
     except Exception as e:
-        logger.exception("Error while loading dashboard")
+        print("❌ Error while loading dashboard:", e)
         return f"<h1>Error</h1><p>{e}</p>"
 
-# Initialize DB only if running locally
+# Initialize DB only when running locally
 init_report_db()
