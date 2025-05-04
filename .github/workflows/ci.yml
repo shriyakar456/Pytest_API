@@ -62,3 +62,12 @@ jobs:
           echo "- Total Tests: $TOTAL" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Passed: $PASSED" >> $GITHUB_STEP_SUMMARY
           echo "- ❌ Failed: $FAILED" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit updated test_reports.db
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git pull origin main || true
+          git add test_reports.db
+          git commit -m "🔄 Update test_reports.db after CI run" || echo "No changes to commit"
+          git push origin main || echo "Push skipped (possibly due to no changes)"
