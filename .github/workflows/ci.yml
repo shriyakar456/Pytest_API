@@ -49,25 +49,22 @@ jobs:
       - name: Display summary in GitHub Actions UI
         run: |
           echo "✅ Test run complete. Extracting summary..."
-
           PASSED=$(grep -oP '\d+ passed' test_output.log | grep -oP '\d+')
           FAILED=$(grep -oP '\d+ failed' test_output.log | grep -oP '\d+')
           TOTAL=$(grep -oP 'collected \d+' test_output.log | grep -oP '\d+')
-
           PASSED=${PASSED:-0}
           FAILED=${FAILED:-0}
           TOTAL=${TOTAL:-0}
-
           echo "### ✅ Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Total Tests: $TOTAL" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Passed: $PASSED" >> $GITHUB_STEP_SUMMARY
           echo "- ❌ Failed: $FAILED" >> $GITHUB_STEP_SUMMARY
 
-      - name: Commit updated test_reports.db
+      - name: Commit test_reports.db to repo
+        if: github.ref == 'refs/heads/main'
         run: |
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "github-actions"
-          git pull origin main || true
+          git config user.name "Shriya Kar (CI)"
+          git config user.email "shriyakar@example.com"
           git add test_reports.db
           git commit -m "🔄 Update test_reports.db after CI run" || echo "No changes to commit"
-          git push origin main || echo "Push skipped (possibly due to no changes)"
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git HEAD:main
