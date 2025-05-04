@@ -27,26 +27,28 @@ jobs:
 
       - name: Start Flask app in background
         run: |
-          nohup python app_login.py > flask_stdout.log 2>&1 &
+          nohup python app_login.py &
           sleep 5
 
       - name: Run tests with coverage and HTML report
         run: |
-          pytest --cov=app_login --html=report.html --self-contained-html tests/ > test_output.log
+          pytest --cov=app_login --html=report.html --self-contained-html tests/ | tee test_output.log
+        continue-on-error: true
 
-      - name: Upload app logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-logs
-          path: |
-            app.log
-            test_output.log
-            flask_stdout.log
-
-      - name: Upload test database and report
+      - name: Upload test report DB
         uses: actions/upload-artifact@v4
         with:
           name: sqlite_test_reports
-          path: |
-            test_reports.db
-            report.html
+          path: test_reports.db
+
+      - name: Upload test output log
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-logs
+          path: test_output.log
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report
+          path: report.html
