@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request
 import sqlite3
 import os
+from logger import setup_logger
 
 app = Flask(__name__)
+logger = setup_logger("Dashboard")
 
 def init_report_db():
     if not os.path.exists("test_reports.db"):
@@ -18,17 +20,18 @@ def init_report_db():
         """)
         conn.commit()
         conn.close()
+        logger.info("Initialized test_reports.db")
 
 @app.route("/")
 def dashboard():
-    print("🟢 / route hit")
+    logger.info("Dashboard route hit")
     try:
         conn = sqlite3.connect("test_reports.db", check_same_thread=False)
         cursor = conn.cursor()
 
         status_filter = request.args.get("status")
         if status_filter:
-            print(f"🔍 Filtering by status: {status_filter}")
+            logger.info(f"Filtering by status: {status_filter}")
             cursor.execute("SELECT * FROM test_results WHERE status=? ORDER BY timestamp DESC", (status_filter,))
         else:
             cursor.execute("SELECT * FROM test_results ORDER BY timestamp DESC")
@@ -48,7 +51,6 @@ def dashboard():
                 WHERE timestamp=?
                 GROUP BY status
             """, (latest_time,))
-
             result_counts = cursor.fetchall()
             for status, count in result_counts:
                 summary[status] = count
@@ -57,11 +59,11 @@ def dashboard():
         summary["FAIL"] = summary.get("FAIL", 0)
         conn.close()
 
-        print(f"📊 {len(results)} results loaded from DB")
+        logger.info(f"Loaded {len(results)} test results from DB")
         return render_template("dashboard.html", results=results, summary=summary)
 
     except Exception as e:
-        print("❌ Error while loading dashboard:", e)
+        logger.exception("Error while loading dashboard")
         return f"<h1>Error</h1><p>{e}</p>"
 
 # Initialize DB only if running locally

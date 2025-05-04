@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  USER_DB: test_users.db
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -27,23 +24,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-html
-      
-      - name: Clean old test DBs
-        run: |
-          rm -f test_users.db
-          rm -f test_reports.db
 
       - name: Start Flask app in background
         run: |
-          nohup python app_login.py &
+          nohup python app_login.py > flask_stdout.log 2>&1 &
           sleep 5
 
-      - name: Run tests with coverage
+      - name: Run tests with coverage and HTML report
         run: |
-          pytest --cov=app_login --html=report.html --self-contained-html tests/
+          pytest --cov=app_login --html=report.html --self-contained-html tests/ > test_output.log
 
-      - name: Upload test report DB
+      - name: Upload app logs
         uses: actions/upload-artifact@v4
         with:
-           name: html_report
-           path: report.html
+          name: app-logs
+          path: |
+            app.log
+            test_output.log
+            flask_stdout.log
+
+      - name: Upload test database and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlite_test_reports
+          path: |
+            test_reports.db
+            report.html
