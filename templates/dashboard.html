@@ -41,11 +41,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for name, status, time in results %}
+            {% for row in results %}
             <tr>
-                <td>{{ name }}</td>
-                <td class="{{ status|lower }}">{{ status }}</td>
-                <td>{{ time }}</td>
+                <td>{{ row.test_name }}</td>
+                <td class="{{ row.status|lower }}">{{ row.status }}</td>
+                <td>{{ row.timestamp }}</td>
             </tr>
             {% endfor %}
         </tbody>
