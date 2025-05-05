@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import sqlite3, os
 from dotenv import load_dotenv
 
-load_dotenv()  # ✅ Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 REPORT_DB_PATH = os.getenv("REPORT_DB", "test_reports.db")
@@ -19,6 +19,7 @@ def init_report_db():
 def dashboard():
     try:
         conn = sqlite3.connect(REPORT_DB_PATH, check_same_thread=False)
+        conn.row_factory = sqlite3.Row  # ✅ Enable named access
         cursor = conn.cursor()
 
         status_filter = request.args.get("status")
@@ -33,15 +34,15 @@ def dashboard():
 
         summary = {"timestamp": "N/A", "PASS": 0, "FAIL": 0}
         if latest_run:
-            latest_run_id = latest_run[0]
+            latest_run_id = latest_run["run_id"]
             cursor.execute("SELECT timestamp FROM test_results WHERE run_id=? LIMIT 1", (latest_run_id,))
             ts_row = cursor.fetchone()
-            summary["timestamp"] = ts_row[0] if ts_row else "N/A"
+            summary["timestamp"] = ts_row["timestamp"] if ts_row else "N/A"
 
             cursor.execute("SELECT status, COUNT(*) FROM test_results WHERE run_id=? GROUP BY status", (latest_run_id,))
             counts = cursor.fetchall()
-            for status, count in counts:
-                summary[status] = count
+            for row in counts:
+                summary[row["status"]] = row["COUNT(*)"]
 
         conn.close()
         summary["PASS"] = summary.get("PASS", 0)

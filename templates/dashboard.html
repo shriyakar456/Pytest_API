@@ -43,9 +43,9 @@
         <tbody>
             {% for row in results %}
             <tr>
-                <td>{{ row.test_name }}</td>
-                <td class="{{ row.status|lower }}">{{ row.status }}</td>
-                <td>{{ row.timestamp }}</td>
+                <td>{{ row['test_name'] }}</td>
+                <td class="{{ row['status']|lower }}">{{ row['status'] }}</td>
+                <td>{{ row['timestamp'] }}</td>
             </tr>
             {% endfor %}
         </tbody>
